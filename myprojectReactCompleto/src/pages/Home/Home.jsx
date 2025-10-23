@@ -33,7 +33,7 @@ export function Home() {
                     <div className="container">
                         <h1 className="display-4">Bienvenido a nuestra tienda</h1>
                         <p className="lead">Descubre nuestra selección de productos de alta calidad</p>
-                        <Link to="/inventario" className="btn btn-light btn-lg mt-3">
+                        <Link to="/shop" className="btn btn-light btn-lg mt-3">
                             Ver Productos
                         </Link>
                     </div>
@@ -77,7 +77,7 @@ export function Home() {
                                             </p>
                                             <div className="d-flex justify-content-between align-items-center">
                                                 <span className="h5 mb-0">${producto.precio}</span>
-                                                <Link to="/inventario" className="btn btn-outline-primary">
+                                                <Link to="/shop" className="btn btn-outline-primary">
                                                     Ver más
                                                 </Link>
                                             </div>

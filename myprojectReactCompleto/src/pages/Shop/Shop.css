@@ -1,36 +1,29 @@
 .card {
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.2s;
+    height: 100%;
 }
 
 .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .card-img-top {
-    transition: opacity 0.2s;
+    height: 200px;
+    object-fit: cover;
 }
 
-.card:hover .card-img-top {
-    opacity: 0.9;
+.card-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+}
+
+.card-text {
+    color: #6c757d;
+    margin-bottom: 1rem;
 }
 
 .btn-primary {
-    transition: all 0.2s;
-}
-
-.btn-primary:hover {
-    transform: scale(1.02);
-}
-
-.price {
-    font-size: 1.25rem;
-    color: #0d6efd;
-}
-
-@media (max-width: 768px) {
-    .row-cols-md-2 > * {
-        flex: 0 0 auto;
-        width: 100%;
-    }
+    width: 100%;
+    margin-top: auto;
 }

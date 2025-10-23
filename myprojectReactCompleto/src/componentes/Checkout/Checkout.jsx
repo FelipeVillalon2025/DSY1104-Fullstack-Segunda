@@ -1,10 +1,10 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { CartContext } from '../../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 import './Checkout.css';
 
 const Checkout = () => {
-    const { cart, getCartTotal, clearCart } = useContext(CartContext);
+    const { items: cart, getTotal, clearCart } = useContext(CartContext);
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         nombre: '',
@@ -15,6 +15,27 @@ const Checkout = () => {
         telefono: ''
     });
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        // Autofill desde usuario en localStorage si existe
+        try {
+            const raw = localStorage.getItem('user');
+            if (raw) {
+                const user = JSON.parse(raw);
+                setFormData(prev => ({
+                    ...prev,
+                    nombre: user.nombre || user.name || prev.nombre,
+                    email: user.email || prev.email,
+                    direccion: user.direccion || user.address || prev.direccion,
+                    ciudad: user.ciudad || user.city || prev.ciudad,
+                    codigoPostal: user.codigoPostal || user.postalCode || prev.codigoPostal,
+                    telefono: user.telefono || user.phone || prev.telefono
+                }));
+            }
+        } catch (err) {
+            console.warn('No se pudo leer user de localStorage para autofill', err);
+        }
+    }, []);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -36,7 +57,7 @@ const Checkout = () => {
             // Simular envío de orden
             const orderData = {
                 items: cart,
-                total: getCartTotal(),
+                total: getTotal(),
                 customerInfo: formData,
                 orderDate: new Date().toISOString()
             };
@@ -53,7 +74,7 @@ const Checkout = () => {
         }
     };
 
-    if (cart.length === 0) {
+    if (!cart || cart.length === 0) {
         navigate('/');
         return null;
     }
@@ -172,7 +193,7 @@ const Checkout = () => {
                         <hr />
                         <div className="d-flex justify-content-between">
                             <strong>Total:</strong>
-                            <strong>${getCartTotal().toFixed(2)}</strong>
+                            <strong>${getTotal().toFixed(2)}</strong>
                         </div>
                     </div>
                 </div>

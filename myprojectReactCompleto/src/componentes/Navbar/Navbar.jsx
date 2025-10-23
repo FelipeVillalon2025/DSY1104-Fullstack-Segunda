@@ -15,10 +15,13 @@ export function Navbar() {
         }
     }, []);
 
+    const isAdmin = user && (user.rol === 'ADMIN' || user.rol === 'SUPERADMIN');
+
     const handleLogout = () => {
         localStorage.removeItem('user');
+        localStorage.removeItem('cart');  // Limpiar el carrito al cerrar sesión
         setUser(null);
-        navigate('/');
+        window.location.href = '/';  // Usar window.location para forzar recarga completa
     };
 
     return (
@@ -38,7 +41,7 @@ export function Navbar() {
                         <li className="nav-item"> 
                             <Link className="nav-link" to="/shop">Tienda</Link> 
                         </li>  
-                        {user && (
+                        {isAdmin && (
                             <li className="nav-item"> 
                                 <Link className="nav-link" to="/inventario">Inventario</Link> 
                             </li> 
@@ -69,7 +72,7 @@ export function Navbar() {
                                     {user.nombre}
                                 </a>
                                 <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                    {user.rol === 'superadmin' && (
+                                    {isAdmin && (
                                         <li>
                                             <Link className="dropdown-item" to="/inventario">
                                                 <i className="bi bi-gear me-2"></i>
@@ -89,12 +92,20 @@ export function Navbar() {
                                 </ul>
                             </li>
                         ) : (
-                            <li className="nav-item">
-                                <Link className="nav-link" to="/login">
-                                    <i className="bi bi-box-arrow-in-right me-1"></i>
-                                    Iniciar Sesión
-                                </Link>
-                            </li>
+                            <>
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/login">
+                                        <i className="bi bi-box-arrow-in-right me-1"></i>
+                                        Iniciar Sesión
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/register">
+                                        <i className="bi bi-person-plus me-1"></i>
+                                        Crear Cuenta
+                                    </Link>
+                                </li>
+                            </>
                         )}
                     </ul>
                 </div> 

@@ -30,9 +30,11 @@ export function Login() {
                 throw new Error('Credenciales inválidas');
             }
 
-            const data = await response.json();
-            localStorage.setItem('user', JSON.stringify(data));
-            navigate('/');
+            const userData = await response.json();
+            // Normalizar el rol a mayúsculas
+            userData.rol = (userData.rol || '').toUpperCase();
+            localStorage.setItem('user', JSON.stringify(userData));
+            navigate(userData.rol === 'ADMIN' ? '/inventario' : '/shop');
 
         } catch (error) {
             setError(error.message);
