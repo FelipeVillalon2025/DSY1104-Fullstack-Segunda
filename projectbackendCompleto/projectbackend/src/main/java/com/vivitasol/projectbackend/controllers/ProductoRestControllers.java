@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.vivitasol.projectbackend.entities.Producto;
 import com.vivitasol.projectbackend.services.ProductoServices;
 
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174"})
 @RestController
 @RequestMapping("/api/productos")
 public class ProductoRestControllers {
@@ -28,8 +28,38 @@ public class ProductoRestControllers {
 
     @PostMapping
     public ResponseEntity<Producto> crearProducto(@RequestBody Producto producto) {
+        // Validar stock
+        if (producto.getStock() == null) {
+            producto.setStock(0);
+        }
+        if (producto.getStock() < 0) {
+            throw new IllegalArgumentException("El stock no puede ser negativo");
+        }
         Producto nuevoProducto = productoServices.crear(producto);
         return ResponseEntity.ok(nuevoProducto);
+    }
+    
+    @PostMapping("/{id}/imagen")
+    public ResponseEntity<Producto> actualizarImagen(@PathVariable Long id, @RequestBody ImagenRequest request) {
+        try {
+            Producto producto = productoServices.actualizarImagen(id, request.getImagenUrl());
+            return ResponseEntity.ok(producto);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/{id}/stock")
+    public ResponseEntity<Producto> actualizarStock(@PathVariable Long id, @RequestBody StockRequest request) {
+        try {
+            if (request.getCantidad() == null) {
+                return ResponseEntity.badRequest().build();
+            }
+            Producto producto = productoServices.actualizarStock(id, request.getCantidad());
+            return ResponseEntity.ok(producto);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/{id}")

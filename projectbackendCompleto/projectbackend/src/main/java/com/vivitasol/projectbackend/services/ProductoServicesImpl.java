@@ -4,17 +4,25 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.vivitasol.projectbackend.entities.Categoria;
 import com.vivitasol.projectbackend.entities.Producto;
 import com.vivitasol.projectbackend.repositories.ProductoRepositories;
 
 @Service
 public class ProductoServicesImpl implements ProductoServices{
 
- @Autowired
+    @Autowired
     private ProductoRepositories productoRepositories;
+    
+    @Autowired
+    private CategoriaServices categoriaServices;
 
     @Override
     public Producto crear(Producto producto){
+        if (producto.getCategoria() != null && producto.getCategoria().getId() != null) {
+            Categoria categoria = categoriaServices.obtenerId(producto.getCategoria().getId());
+            producto.setCategoria(categoria);
+        }
         return productoRepositories.save(producto);
     }
 
@@ -53,4 +61,20 @@ public class ProductoServicesImpl implements ProductoServices{
         return productoRepositories.save(producto);
     }
 
+    @Override
+    public Producto actualizarImagen(Long id, String imagenUrl) {
+        Producto producto = obtenerId(id);
+        producto.setImagenUrl(imagenUrl);
+        return productoRepositories.save(producto);
+    }
+
+    @Override
+    public Producto actualizarStock(Long id, Integer cantidad) {
+        if (cantidad < 0) {
+            throw new IllegalArgumentException("La cantidad no puede ser negativa");
+        }
+        Producto producto = obtenerId(id);
+        producto.setStock(cantidad);
+        return productoRepositories.save(producto);
+    }
 }

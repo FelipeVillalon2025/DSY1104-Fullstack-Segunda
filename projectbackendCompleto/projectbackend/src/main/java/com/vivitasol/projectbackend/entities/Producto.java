@@ -22,6 +22,8 @@ public class Producto {
     private String nombre;
     private String descripcion;
     private Long precio;
+    private Integer stock = 0;
+    private String imagenUrl;
     private Boolean activo = true;
     
     @ManyToOne(fetch = FetchType.EAGER)

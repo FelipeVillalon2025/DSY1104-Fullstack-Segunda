@@ -10,7 +10,7 @@ import java.util.List;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174"})
 @RestController
 @RequestMapping("/api/categorias")
 public class CategoriaRestControllers {
