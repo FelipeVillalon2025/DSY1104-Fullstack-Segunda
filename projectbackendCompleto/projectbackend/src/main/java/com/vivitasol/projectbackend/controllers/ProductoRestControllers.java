@@ -1,6 +1,7 @@
 package com.vivitasol.projectbackend.controllers;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -88,9 +89,38 @@ public class ProductoRestControllers {
 
  
     @GetMapping
-    public ResponseEntity<List<Producto>> listarProductos() {
+    public ResponseEntity<List<Producto>> listarProductos(
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String search,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) Long categoriaId) {
+
         List<Producto> productos = productoServices.listarTodas();
+
+        // Filtrar por búsqueda si se provee
+        if (search != null && !search.trim().isEmpty()) {
+            String s = search.trim().toLowerCase();
+            productos = productos.stream()
+                    .filter(p -> (p.getNombre() != null && p.getNombre().toLowerCase().contains(s))
+                            || (p.getDescripcion() != null && p.getDescripcion().toLowerCase().contains(s)))
+                    .collect(Collectors.toList());
+        }
+
+        // Filtrar por categoría si se provee
+        if (categoriaId != null) {
+            productos = productos.stream()
+                    .filter(p -> p.getCategoria() != null && categoriaId.equals(p.getCategoria().getId()))
+                    .collect(Collectors.toList());
+        }
+
         return ResponseEntity.ok(productos);
+    }
+
+    @GetMapping("/low-stock")
+    public ResponseEntity<List<Producto>> productosLowStock(@org.springframework.web.bind.annotation.RequestParam(required = false, defaultValue = "3") Integer threshold) {
+        List<Producto> productos = productoServices.listarTodas();
+        List<Producto> low = productos.stream()
+                .filter(p -> p.getStock() != null && p.getStock() <= threshold)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(low);
     }
 
   

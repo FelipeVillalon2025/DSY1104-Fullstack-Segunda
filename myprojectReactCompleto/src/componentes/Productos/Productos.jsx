@@ -5,10 +5,19 @@ import './Productos.css';
 export function Productos() {
 
     const [productos, setProductos] = useState([]);
+    const [categorias, setCategorias] = useState([]);
+    const [categoriaSeleccionada, setCategoriaSeleccionada] = useState('');
+    const [search, setSearch] = useState('');
+    const [lowStockItems, setLowStockItems] = useState([]);
  
-    const cargarProductos = async () => {
+    const cargarProductos = async (opts = {}) => {
         try {
-            const response = await fetch('http://localhost:8080/api/productos');
+            // Construir URL con parámetros opcionales (search, categoriaId)
+            const params = new URLSearchParams();
+            if (opts.search) params.append('search', opts.search);
+            if (opts.categoriaId) params.append('categoriaId', opts.categoriaId);
+            const url = `http://localhost:8080/api/productos${params.toString() ? ('?' + params.toString()) : ''}`;
+            const response = await fetch(url);
             if (!response.ok) {
                 throw new Error('Error en la respuesta del servidor');
             }
@@ -20,7 +29,7 @@ export function Productos() {
             const normalized = data.map(p => ({
                 ...p,
                 activo: p.activo === true || p.activo === 'true',
-                imagen_url: p.imagen || p.imagen_url || p.imagenUrl || p.image || null
+                imagen_url: p.imagen || p.imagen_url || p.imagenUrl || p.image || p.imagenUrl || null
             }));
             const uniqueById = Array.from(new Map(normalized.map(p => [p.id, p])).values());
 
@@ -30,8 +39,46 @@ export function Productos() {
         }
     };
  
+    // Cargar productos al montar y cuando cambien search o categoriaSeleccionada (debounced)
     useEffect(() => {
-        cargarProductos();
+        const handler = setTimeout(() => {
+            cargarProductos({ search: search || undefined, categoriaId: categoriaSeleccionada || undefined });
+        }, 300); // debounce 300ms
+        return () => clearTimeout(handler);
+    }, [search, categoriaSeleccionada]);
+
+    // Cargar categorías
+    useEffect(() => {
+        const cargarCategorias = async () => {
+            try {
+                const res = await fetch('http://localhost:8080/api/categorias');
+                if (!res.ok) throw new Error('Error al obtener categorias');
+                const d = await res.json();
+                setCategorias(d);
+            } catch (e) {
+                console.error('Categorias:', e);
+            }
+        };
+        cargarCategorias();
+    }, []);
+
+    // Polling para alertas de stock bajo cada 30s
+    useEffect(() => {
+        let mounted = true;
+        const checkLowStock = async () => {
+            try {
+                const res = await fetch('http://localhost:8080/api/productos/low-stock?threshold=3');
+                if (!res.ok) return;
+                const d = await res.json();
+                if (mounted) setLowStockItems(d);
+            } catch (e) {
+                console.error('Error al verificar stock bajo', e);
+            }
+        };
+        // check inmediato y luego intervalo
+        checkLowStock();
+        const id = setInterval(checkLowStock, 30000);
+        return () => { mounted = false; clearInterval(id); };
     }, []);
 
     const handleDesactivar = (id, nombre) => {
@@ -80,16 +127,46 @@ export function Productos() {
         }
     };
 
+    const handleCategoriaChange = (e) => {
+        setCategoriaSeleccionada(e.target.value);
+    };
+
+    const handleSearchChange = (e) => {
+        setSearch(e.target.value);
+    };
+
     return (
         <>
             <div className="container mi-tabla">
                 <h3 style={{ marginBottom: '20px' }}>Inventario de productos</h3>
                 <div className="row mb-3">
-                    <div className="col-12 text-end">
+                    <div className="col-md-4">
+                        <input type="text" className="form-control" placeholder="Buscar productos..." value={search} onChange={handleSearchChange} />
+                    </div>
+                    <div className="col-md-3">
+                        <select className="form-select" value={categoriaSeleccionada} onChange={handleCategoriaChange}>
+                            <option value="">Todas las categorías</option>
+                            {categorias.map(c => (
+                                <option key={c.id} value={c.id}>{c.nombre}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="col-12 col-md-5 text-end">
                         <Link className="btn btn-outline-dark"
                             style={{ fontSize: '13px' }} to="/crear-producto">Crear Producto</Link>
                     </div>
                 </div>
+
+                {lowStockItems && lowStockItems.length > 0 && (
+                    <div className="alert alert-warning" role="alert">
+                        <strong>Alerta de stock bajo:</strong> {lowStockItems.length} producto(s) con stock ≤ 3. Revisa el inventario.
+                        <ul style={{ marginTop: '8px' }}>
+                            {lowStockItems.map(p => (
+                                <li key={p.id}>{p.nombre} — stock: {p.stock}</li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
 
 
                 <div className="row">
