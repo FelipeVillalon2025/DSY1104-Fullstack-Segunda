@@ -114,4 +114,27 @@ public class ProductoRestControllers {
         return ResponseEntity.ok(productoServices.desactivar(id));
     }
 
+    @PatchMapping("/{id}/activar")
+    public ResponseEntity<Producto> activar(@PathVariable Long id) {
+        return ResponseEntity.ok(productoServices.activar(id));
+    }
+
+    public static class StockRequest {
+        private Integer cantidad;
+        public Integer getCantidad() { return cantidad; }
+        public void setCantidad(Integer cantidad) { this.cantidad = cantidad; }
+    }
+
+    public static class ImagenRequest {
+        private String imagenUrl;
+        public String getImagenUrl() { return imagenUrl; }
+        public void setImagenUrl(String imagenUrl) { this.imagenUrl = imagenUrl; }
+    }
+
+    public static class ErrorResponse {
+        private String mensaje;
+        public ErrorResponse(String mensaje) { this.mensaje = mensaje; }
+        public String getMensaje() { return mensaje; }
+        public void setMensaje(String mensaje) { this.mensaje = mensaje; }
+    }
 }

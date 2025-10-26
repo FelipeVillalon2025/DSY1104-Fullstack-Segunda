@@ -57,6 +57,29 @@ export function Productos() {
         }
     };
 
+    const handleActivar = (id, nombre) => {
+        if (window.confirm(`¿Estás seguro de activar el producto "${nombre}"?`)) {
+            fetch(`http://localhost:8080/api/productos/${id}/activar`, {
+                method: 'PATCH'
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al activar el producto');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Producto activado:', data);
+                    alert('Producto activado exitosamente');
+                    cargarProductos();  
+                })
+                .catch(error => {
+                    console.error('Error al activar:', error);
+                    alert('Error al activar el producto');
+                });
+        }
+    };
+
     return (
         <>
             <div className="container mi-tabla">
@@ -126,9 +149,9 @@ export function Productos() {
                                                 </button>
                                             ) : (
                                                 <button
-                                                    className="btn btn-sm btn-secondary"
-                                                    disabled>
-                                                    Desactivado
+                                                    className="btn btn-sm btn-outline-success"
+                                                    onClick={() => handleActivar(prod.id, prod.nombre)}>
+                                                    Activar
                                                 </button>
                                             )}
                                         </td>

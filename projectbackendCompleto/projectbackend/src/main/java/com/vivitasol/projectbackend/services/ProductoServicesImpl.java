@@ -63,6 +63,13 @@ public class ProductoServicesImpl implements ProductoServices{
     }
 
     @Override
+    public Producto activar(Long id) {
+        Producto producto = obtenerId(id);
+        producto.setActivo(true);
+        return productoRepositories.save(producto);
+    }
+
+    @Override
     public Producto actualizarImagen(Long id, String imagenUrl) {
         Producto producto = obtenerId(id);
         producto.setImagenUrl(imagenUrl);

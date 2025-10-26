@@ -17,6 +17,7 @@ import { CartProvider } from './context/CartContext';
 import { Dashboard } from './pages/Dashboard/Dashboard';
 import './App.css';
 import { Productos } from './componentes/Productos/Productos';
+import { GestionUsuarios } from './pages/Usuarios/GestionUsuarios';
 
 function RequireAuth({ children, requireAdmin }) {
     const [user, setUser] = useState(null);
@@ -61,6 +62,11 @@ function App() {
                     <Route path="/checkout" element={<Checkout />} />
                     <Route path="/payment-success" element={<PaymentSuccess />} />
                     <Route path="/payment-error" element={<PaymentError />} />
+                    <Route path="/usuarios" element={
+                        <RequireAuth requireAdmin={true}>
+                            <GestionUsuarios />
+                        </RequireAuth>
+                    } />
                     
                 {/* Rutas protegidas */}
                 <Route path="/dashboard" element={
