@@ -50,19 +50,51 @@ const Checkout = () => {
         setLoading(true);
 
         try {
-            // Aquí iría la lógica para procesar el pago
-            // Por ahora simulamos un proceso exitoso
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
-            // Simular envío de orden
+            const userData = JSON.parse(localStorage.getItem('user'));
+            if (!userData) {
+                throw new Error('Usuario no autenticado');
+            }
+
+            // Crear la orden
             const orderData = {
-                items: cart,
+                usuario: { id: userData.id },
                 total: getTotal(),
-                customerInfo: formData,
-                orderDate: new Date().toISOString()
+                fecha: new Date().toISOString(),
+                items: cart.map(item => ({
+                    producto: { id: item.id },
+                    cantidad: item.quantity,
+                    precioUnitario: item.precio
+                }))
             };
 
-            console.log('Orden procesada:', orderData);
+            // Enviar la orden al backend
+            const response = await fetch('http://localhost:8080/api/ordenes', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(orderData)
+            });
+
+            if (!response.ok) {
+                throw new Error('Error al crear la orden');
+            }
+
+            // La reducción del stock se maneja automáticamente en el backend al crear la orden
+            await fetch('http://localhost:8080/api/ordenes', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    usuario: { id: userData.id },
+                    items: cart.map(item => ({
+                        producto: { id: item.id },
+                        cantidad: item.quantity,
+                        precioUnitario: item.precio
+                    }))
+                })
+            });
             
             clearCart();
             navigate('/payment-success');
@@ -160,20 +192,30 @@ const Checkout = () => {
                                 />
                             </div>
 
-                            <button 
-                                type="submit" 
-                                className="btn btn-primary w-100"
-                                disabled={loading}
-                            >
-                                {loading ? (
-                                    <>
-                                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                        Procesando...
-                                    </>
-                                ) : (
-                                    'Confirmar Pedido'
-                                )}
-                            </button>
+                            <div className="d-flex gap-2">
+                                <button 
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    onClick={() => navigate('/cart')}
+                                    disabled={loading}
+                                >
+                                    Volver al Carrito
+                                </button>
+                                <button 
+                                    type="submit" 
+                                    className="btn btn-primary flex-grow-1"
+                                    disabled={loading}
+                                >
+                                    {loading ? (
+                                        <>
+                                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                            Procesando...
+                                        </>
+                                    ) : (
+                                        'Confirmar Pedido'
+                                    )}
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>

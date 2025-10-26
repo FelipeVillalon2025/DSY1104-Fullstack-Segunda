@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vivitasol.projectbackend.entities.Producto;
+import com.vivitasol.projectbackend.exceptions.StockInsuficienteException;
 import com.vivitasol.projectbackend.services.ProductoServices;
 
 @CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174"})
@@ -50,13 +51,30 @@ public class ProductoRestControllers {
     }
 
     @PostMapping("/{id}/stock")
-    public ResponseEntity<Producto> actualizarStock(@PathVariable Long id, @RequestBody StockRequest request) {
+    public ResponseEntity<?> actualizarStock(@PathVariable Long id, @RequestBody StockRequest request) {
         try {
             if (request.getCantidad() == null) {
                 return ResponseEntity.badRequest().build();
             }
             Producto producto = productoServices.actualizarStock(id, request.getCantidad());
             return ResponseEntity.ok(producto);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/{id}/reducir-stock")
+    public ResponseEntity<?> reducirStock(@PathVariable Long id, @RequestBody StockRequest request) {
+        try {
+            if (request.getCantidad() == null) {
+                return ResponseEntity.badRequest().build();
+            }
+            Producto producto = productoServices.reducirStock(id, request.getCantidad());
+            return ResponseEntity.ok(producto);
+        } catch (StockInsuficienteException e) {
+            return ResponseEntity
+                .status(400)
+                .body(new ErrorResponse(e.getMessage()));
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }

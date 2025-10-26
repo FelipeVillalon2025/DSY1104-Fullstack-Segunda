@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.vivitasol.projectbackend.entities.Categoria;
 import com.vivitasol.projectbackend.entities.Producto;
+import com.vivitasol.projectbackend.exceptions.StockInsuficienteException;
 import com.vivitasol.projectbackend.repositories.ProductoRepositories;
 
 @Service
@@ -75,6 +76,16 @@ public class ProductoServicesImpl implements ProductoServices{
         }
         Producto producto = obtenerId(id);
         producto.setStock(cantidad);
+        return productoRepositories.save(producto);
+    }
+    
+    @Override
+    public Producto reducirStock(Long id, Integer cantidad) {
+        Producto producto = obtenerId(id);
+        if (producto.getStock() < cantidad) {
+            throw new StockInsuficienteException("No hay suficiente stock disponible");
+        }
+        producto.setStock(producto.getStock() - cantidad);
         return productoRepositories.save(producto);
     }
 }

@@ -10,8 +10,15 @@ export function Home() {
         fetch('http://localhost:8080/api/productos')
             .then(response => response.json())
             .then(data => {
+                // Normalizar campo de imagen y eliminar duplicados
+                const normalized = data.map(p => ({
+                    ...p,
+                    imagenUrl: p.imagenUrl || p.imagen || p.imagen_url || p.image || null,
+                    activo: p.activo === true || p.activo === 'true'
+                }));
+                const uniqueById = Array.from(new Map(normalized.map(p => [p.id, p])).values());
                 // Filtrar solo productos activos y tomar los primeros 3
-                const destacados = data
+                const destacados = uniqueById
                     .filter(p => p.activo)
                     .slice(0, 3);
                 setProductosDestacados(destacados);

@@ -42,9 +42,14 @@ export function Navbar() {
                             <Link className="nav-link" to="/shop">Tienda</Link> 
                         </li>  
                         {isAdmin && (
-                            <li className="nav-item"> 
-                                <Link className="nav-link" to="/inventario">Inventario</Link> 
-                            </li> 
+                            <>
+                                <li className="nav-item"> 
+                                    <Link className="nav-link" to="/inventario">Inventario</Link> 
+                                </li>
+                                <li className="nav-item"> 
+                                    <Link className="nav-link" to="/dashboard">Dashboard</Link> 
+                                </li>
+                            </> 
                         )}
                         <li className="nav-item"> 
                             <Link className="nav-link" to="/contacto">Contacto</Link> 

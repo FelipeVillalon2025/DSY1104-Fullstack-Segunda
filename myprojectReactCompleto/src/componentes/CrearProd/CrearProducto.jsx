@@ -13,7 +13,8 @@ export function CrearProducto() {
     nombre: '',
     descripcion: '',
     precio: '',
-    categoria: ''
+    categoria: '',
+    stock: 0
   });
 
   const [categorias, setCategorias] = useState([]);
@@ -57,7 +58,8 @@ export function CrearProducto() {
     nombre: producto.nombre.trim(),
     descripcion: producto.descripcion.trim(),
     precio: parseFloat(producto.precio),
-    categoria: { id: parseInt(producto.categoria, 10) }
+    categoria: { id: parseInt(producto.categoria, 10) },
+    stock: parseInt(producto.stock, 10)
   };
 
     try {
@@ -151,26 +153,45 @@ export function CrearProducto() {
                   </small>
               </div>
 
-              <div className="form-group">
-                <label htmlFor="categoria">
-                  Categoría <span className="required">*</span>
-                </label>
-                <select
-                  id="categoria" name="categoria" value={producto.categoria}
-                  onChange={handleChange} disabled={loading || categorias.length === 0}
-                  required>
-                    
-                  <option value="">Seleccione una categoría</option>
-                  {categorias.map(cat => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.nombre}
-                    </option>
-                  ))}
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="categoria">
+                    Categoría <span className="required">*</span>
+                  </label>
+                  <select
+                    id="categoria" name="categoria" value={producto.categoria}
+                    onChange={handleChange} disabled={loading || categorias.length === 0}
+                    required>
+                      
+                    <option value="">Seleccione una categoría</option>
+                    {categorias.map(cat => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.nombre}
+                      </option>
+                    ))}
 
-                </select>
-                {categorias.length === 0 && !loadingCategorias && (
-                  <small className="error-text">No hay categorías disponibles</small>
-                )}
+                  </select>
+                  {categorias.length === 0 && !loadingCategorias && (
+                    <small className="error-text">No hay categorías disponibles</small>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="stock">
+                    Stock Inicial <span className="required">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    id="stock"
+                    name="stock"
+                    value={producto.stock}
+                    onChange={handleChange}
+                    disabled={loading}
+                    min="0"
+                    required
+                    placeholder="0"
+                  />
+                </div>
               </div>
 
               <div className="form-actions">

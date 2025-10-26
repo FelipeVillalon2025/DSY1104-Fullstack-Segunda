@@ -14,6 +14,7 @@ import Checkout from './componentes/Checkout/Checkout';
 import { PaymentSuccess, PaymentError } from './componentes/PaymentResult/PaymentResult';
 import { Shop } from './pages/Shop/Shop';
 import { CartProvider } from './context/CartContext';
+import { Dashboard } from './pages/Dashboard/Dashboard';
 import './App.css';
 import { Productos } from './componentes/Productos/Productos';
 
@@ -60,8 +61,13 @@ function App() {
                     <Route path="/checkout" element={<Checkout />} />
                     <Route path="/payment-success" element={<PaymentSuccess />} />
                     <Route path="/payment-error" element={<PaymentError />} />
-                
+                    
                 {/* Rutas protegidas */}
+                <Route path="/dashboard" element={
+                    <RequireAuth requireAdmin={true}>
+                        <Dashboard />
+                    </RequireAuth>
+                } />
                 <Route path="/inventario" element={
                     <RequireAuth requireAdmin={true}>
                         <Inventario />

@@ -18,12 +18,14 @@ export function Shop() {
                     throw new Error(`Error ${response.status}: ${response.statusText}`);
                 }
                 const data = await response.json();
-                // Normalizar el campo activo
-                const productosNormalizados = data.map(p => ({
+                // Normalizar campos y eliminar duplicados por id
+                const normalized = data.map(p => ({
                     ...p,
                     activo: p.activo === true || p.activo === 'true',
+                    imagen_url: p.imagen || p.imagen_url || p.imagenUrl || p.image || null
                 }));
-                setProductos(productosNormalizados);
+                const uniqueById = Array.from(new Map(normalized.map(p => [p.id, p])).values());
+                setProductos(uniqueById);
             } catch (err) {
                 setError(err.message);
                 toast.error(`Error al cargar productos: ${err.message}`);

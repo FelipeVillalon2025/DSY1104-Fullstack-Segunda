@@ -16,12 +16,15 @@ export function Productos() {
             const data = await response.json();
             console.log("Respuesta del backend:", data);
 
-            const productosNormalizados = data.map(p => ({
+            // Normalizar campos y eliminar duplicados por id
+            const normalized = data.map(p => ({
                 ...p,
                 activo: p.activo === true || p.activo === 'true',
+                imagen_url: p.imagen || p.imagen_url || p.imagenUrl || p.image || null
             }));
+            const uniqueById = Array.from(new Map(normalized.map(p => [p.id, p])).values());
 
-            setProductos(productosNormalizados);
+            setProductos(uniqueById);
         } catch (error) {
             console.error('Error al obtener los productos:', error);
         }
@@ -71,10 +74,12 @@ export function Productos() {
                         <table className="table table-hover">
                             <thead>
                                 <tr>
+                                    <th>Imagen</th>
                                     <th>Id Producto</th>
                                     <th>Nombre</th>
                                     <th>Descripción</th>
                                     <th>Precio</th>
+                                    <th>Stock</th>
                                     <th>Editar Producto</th>
                                     <th>Desactivar/Eliminar </th>
                                 </tr>
@@ -84,10 +89,18 @@ export function Productos() {
                                     <tr key={prod.id}
                                         style={{ opacity: prod.activo ? 1 : 0.5,
                                             backgroundColor: prod.activo ? 'white' : '#f8f8f8'}}>
+                                        <td>
+                                            {prod.imagen_url ? (
+                                                <img src={prod.imagen_url} alt={prod.nombre} style={{ width: '80px', height: '60px', objectFit: 'cover', borderRadius: '4px' }} />
+                                            ) : (
+                                                <div style={{ width: '80px', height: '60px', background: '#f0f0f0' }} />
+                                            )}
+                                        </td>
                                         <td>{prod.id}</td>
                                         <td>{prod.nombre}</td>
                                         <td>{prod.descripcion}</td>
-                                        <td>{prod.precio}</td>
+                                        <td>${prod.precio.toLocaleString()}</td>
+                                        <td>{prod.stock || 0}</td>
                                         <td>
                                             {prod.activo ? (
                                                 <Link className="btn btn-outline-primary"
