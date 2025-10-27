@@ -25,17 +25,17 @@ public class BootstrapData {
                 Usuario admin = new Usuario();
                 admin.setNombre("Administrador");
                 admin.setEmail(adminEmail);
-                admin.setContrasena(encoder.encode("admin123"));
-                admin.setRol("superadmin");
+                admin.setPassword(encoder.encode("admin123"));
+                admin.setRol("ADMIN");
                 admin.setActivo(true);
-                admin.setFechaCreacion(LocalDateTime.now());
+                admin.setCreadoEn(LocalDateTime.now());
                 usuarioRepositories.save(admin);
                 System.out.println("Admin creado: " + adminEmail);
             } else {
                 // si existe pero la contraseña parece no estar encriptada (muy simple heurística)
-                String pwd = existing.getContrasena();
+                String pwd = existing.getPassword();
                 if (pwd != null && !pwd.startsWith("$2a$") && !pwd.startsWith("$2b$") && !pwd.startsWith("$2y$")){
-                    existing.setContrasena(encoder.encode(pwd));
+                    existing.setPassword(encoder.encode(pwd));
                     usuarioRepositories.save(existing);
                     System.out.println("Admin existente actualizado y contraseña encriptada: " + adminEmail);
                 }

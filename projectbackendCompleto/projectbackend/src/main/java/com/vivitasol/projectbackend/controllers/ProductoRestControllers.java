@@ -5,16 +5,15 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import com.vivitasol.projectbackend.entities.Producto;
 import com.vivitasol.projectbackend.exceptions.StockInsuficienteException;
@@ -23,11 +22,19 @@ import com.vivitasol.projectbackend.services.ProductoServices;
 @CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174"})
 @RestController
 @RequestMapping("/api/productos")
+@Tag(name = "Productos", description = "API para la gestión de productos")
 public class ProductoRestControllers {
 
     @Autowired
     private ProductoServices productoServices;
 
+    @Operation(summary = "Crear un nuevo producto", description = "Crea un nuevo producto en el sistema")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Producto creado exitosamente",
+                content = { @Content(mediaType = "application/json", 
+                schema = @Schema(implementation = Producto.class)) }),
+        @ApiResponse(responseCode = "400", description = "Datos del producto inválidos")
+    })
     @PostMapping
     public ResponseEntity<Producto> crearProducto(@RequestBody Producto producto) {
         // Validar stock
@@ -88,10 +95,18 @@ public class ProductoRestControllers {
     }
 
  
+    @Operation(summary = "Listar productos", description = "Obtiene la lista de productos con filtros opcionales")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Lista de productos obtenida exitosamente",
+                content = { @Content(mediaType = "application/json", 
+                schema = @Schema(implementation = Producto.class)) })
+    })
     @GetMapping
     public ResponseEntity<List<Producto>> listarProductos(
-            @org.springframework.web.bind.annotation.RequestParam(required = false) String search,
-            @org.springframework.web.bind.annotation.RequestParam(required = false) Long categoriaId) {
+            @Parameter(description = "Texto para buscar en nombre o descripción") 
+            @RequestParam(required = false) String search,
+            @Parameter(description = "ID de la categoría para filtrar") 
+            @RequestParam(required = false) Long categoriaId) {
 
         List<Producto> productos = productoServices.listarTodas();
 
@@ -114,8 +129,17 @@ public class ProductoRestControllers {
         return ResponseEntity.ok(productos);
     }
 
+    @Operation(summary = "Listar productos con stock bajo", 
+             description = "Obtiene la lista de productos cuyo stock es menor o igual al umbral especificado")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Lista de productos con stock bajo obtenida exitosamente",
+                content = { @Content(mediaType = "application/json", 
+                schema = @Schema(implementation = Producto.class)) })
+    })
     @GetMapping("/low-stock")
-    public ResponseEntity<List<Producto>> productosLowStock(@org.springframework.web.bind.annotation.RequestParam(required = false, defaultValue = "3") Integer threshold) {
+    public ResponseEntity<List<Producto>> productosLowStock(
+            @Parameter(description = "Umbral de stock bajo (por defecto: 3)") 
+            @RequestParam(required = false, defaultValue = "3") Integer threshold) {
         List<Producto> productos = productoServices.listarTodas();
         List<Producto> low = productos.stream()
                 .filter(p -> p.getStock() != null && p.getStock() <= threshold)

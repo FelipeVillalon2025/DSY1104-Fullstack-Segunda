@@ -5,11 +5,11 @@ import java.util.List;
 
 public interface UsuarioService {
     Usuario crear(Usuario usuario);
-    Usuario obtenerPorId(Long id);
-    Usuario obtenerPorEmail(String email);
+    Usuario obtenerId(Long id);
     List<Usuario> listarTodos();
-    Usuario actualizar(Long id, Usuario usuario);
+    Usuario actualizar(Long id, Usuario usuarioActualizado);
     void eliminar(Long id);
-    Usuario desactivar(Long id);
+    Usuario inhabilitar(Long id);
+    Usuario encontrarPorEmail(String email);
     Usuario autenticar(String email, String contrasena);
 }

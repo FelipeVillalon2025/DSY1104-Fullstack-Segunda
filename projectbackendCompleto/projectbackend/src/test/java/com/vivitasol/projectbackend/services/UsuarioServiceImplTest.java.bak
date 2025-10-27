@@ -1,0 +1,78 @@
+﻿package com.vivitasol.projectbackend.services;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import com.vivitasol.projectbackend.entities.Usuario;
+import com.vivitasol.projectbackend.repositories.UsuarioRepositories;
+
+import java.util.Optional;
+
+public class UsuarioServiceImplTest {
+
+    @Mock
+    private UsuarioRepositories usuarioRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @InjectMocks
+    private UsuarioServiceImpl usuarioService;
+
+    @BeforeEach
+    public void setup() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    public void crear_shouldEncodePasswordAndSave() {
+        Usuario u = new Usuario();
+        u.setNombre("Test");
+        u.setEmail("t@t.com");
+        u.setPassword("plain");
+
+        when(usuarioRepository.existsByEmail(u.getEmail())).thenReturn(false);
+        when(passwordEncoder.encode("plain")).thenReturn("encoded");
+        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Usuario creado = usuarioService.crear(u);
+
+        assertEquals("encoded", creado.getPassword());
+        verify(usuarioRepository, times(1)).save(any(Usuario.class));
+    }
+
+    @Test
+    public void autenticar_shouldReturnUserWhenPasswordMatches() {
+        Usuario u = new Usuario();
+        u.setEmail("a@a.com");
+        u.setPassword("encoded");
+
+        when(usuarioRepository.findByEmail("a@a.com")).thenReturn(Optional.of(u));
+        when(passwordEncoder.matches("raw", "encoded")).thenReturn(true);
+
+        Usuario res = usuarioService.autenticar("a@a.com", "raw");
+        assertNotNull(res);
+        assertEquals(u.getEmail(), res.getEmail());
+    }
+
+    @Test
+    public void inhabilitar_shouldSetActivoFalse() {
+        Usuario u = new Usuario();
+        u.setId(1L);
+        u.setActivo(true);
+
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(u));
+        when(usuarioRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        Usuario res = usuarioService.inhabilitar(1L);
+        assertFalse(res.getActivo());
+        verify(usuarioRepository, times(1)).save(u);
+    }
+}

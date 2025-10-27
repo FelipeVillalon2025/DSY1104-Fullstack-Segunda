@@ -1,21 +1,20 @@
 package com.vivitasol.projectbackend.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Column;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 
+@Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
+// Agregué @Table para asegurar que el nombre de la tabla sea 'usuario' en minúsculas,
+// lo cual es una buena práctica y coincide con el error que vimos.
+@Table(name = "usuario")
 public class Usuario {
 
     @Id
@@ -23,20 +22,30 @@ public class Usuario {
     private Long id;
 
     @NotBlank
+    @Size(max = 100)
     private String nombre;
 
+    @NotBlank
     @Email
     @Column(unique = true)
     private String email;
 
     @NotBlank
-    private String contrasena; // en BD se guardará encriptada
+    @Column(name = "contrasena") // <-- ¡AQUÍ ESTÁ LA CORRECCIÓN!
+    private String password; // almacenada encriptada
 
     @NotBlank
-    private String rol; // cliente, vendedor, superadmin
+    private String rol; // e.g. cliente, vendedor, super-admin
 
     private Boolean activo = true;
 
-    private LocalDateTime fechaCreacion = LocalDateTime.now();
+    // Cambié el nombre de la columna para seguir la convención de Java y SQL
+    @Column(name = "creado_en")
+    private LocalDateTime creadoEn;
 
+    @PrePersist
+    public void prePersist() {
+        this.creadoEn = LocalDateTime.now();
+        if (this.activo == null) this.activo = true;
+    }
 }

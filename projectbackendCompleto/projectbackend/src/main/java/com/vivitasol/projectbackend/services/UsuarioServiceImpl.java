@@ -1,10 +1,12 @@
 package com.vivitasol.projectbackend.services;
 
-import com.vivitasol.projectbackend.entities.Usuario;
-import com.vivitasol.projectbackend.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import com.vivitasol.projectbackend.entities.Usuario;
+import com.vivitasol.projectbackend.repositories.UsuarioRepository;
+
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 
@@ -22,19 +24,15 @@ public class UsuarioServiceImpl implements UsuarioService {
         if (usuarioRepository.existsByEmail(usuario.getEmail())) {
             throw new RuntimeException("El email ya está registrado");
         }
-        usuario.setContrasena(passwordEncoder.encode(usuario.getContrasena()));
+        if (usuario.getPassword() != null) {
+            usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+        }
         return usuarioRepository.save(usuario);
     }
 
     @Override
-    public Usuario obtenerPorId(Long id) {
+    public Usuario obtenerId(Long id) {
         return usuarioRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado"));
-    }
-
-    @Override
-    public Usuario obtenerPorEmail(String email) {
-        return usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado"));
     }
 
@@ -45,19 +43,20 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public Usuario actualizar(Long id, Usuario usuarioActualizado) {
-        Usuario existente = obtenerPorId(id);
-        
+        Usuario existente = obtenerId(id);
+
         if (!existente.getEmail().equals(usuarioActualizado.getEmail()) &&
-            usuarioRepository.existsByEmail(usuarioActualizado.getEmail())) {
+                usuarioRepository.existsByEmail(usuarioActualizado.getEmail())) {
             throw new RuntimeException("El email ya está en uso");
         }
 
         existente.setNombre(usuarioActualizado.getNombre());
         existente.setEmail(usuarioActualizado.getEmail());
-        if (usuarioActualizado.getContrasena() != null && !usuarioActualizado.getContrasena().isEmpty()) {
-            existente.setContrasena(passwordEncoder.encode(usuarioActualizado.getContrasena()));
+        if (usuarioActualizado.getPassword() != null && !usuarioActualizado.getPassword().isEmpty()) {
+            existente.setPassword(passwordEncoder.encode(usuarioActualizado.getPassword()));
         }
         existente.setRol(usuarioActualizado.getRol());
+        existente.setActivo(usuarioActualizado.getActivo());
 
         return usuarioRepository.save(existente);
     }
@@ -71,16 +70,21 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public Usuario desactivar(Long id) {
-        Usuario usuario = obtenerPorId(id);
+    public Usuario inhabilitar(Long id) {
+        Usuario usuario = obtenerId(id);
         usuario.setActivo(false);
         return usuarioRepository.save(usuario);
     }
 
     @Override
+    public Usuario encontrarPorEmail(String email) {
+        return usuarioRepository.findByEmail(email).orElse(null);
+    }
+
+    @Override
     public Usuario autenticar(String email, String contrasena) {
-        Usuario usuario = obtenerPorEmail(email);
-        if (!passwordEncoder.matches(contrasena, usuario.getContrasena())) {
+        Usuario usuario = usuarioRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Credenciales inválidas"));
+        if (!passwordEncoder.matches(contrasena, usuario.getPassword())) {
             throw new RuntimeException("Credenciales inválidas");
         }
         if (!usuario.getActivo()) {
