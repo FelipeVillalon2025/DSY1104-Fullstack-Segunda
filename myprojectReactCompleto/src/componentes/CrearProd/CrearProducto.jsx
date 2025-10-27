@@ -14,7 +14,8 @@ export function CrearProducto() {
     descripcion: '',
     precio: '',
     categoria: '',
-    stock: 0
+    stock: 0,
+    imagenUrl: ''
   });
 
   const [categorias, setCategorias] = useState([]);
@@ -59,7 +60,8 @@ export function CrearProducto() {
     descripcion: producto.descripcion.trim(),
     precio: parseFloat(producto.precio),
     categoria: { id: parseInt(producto.categoria, 10) },
-    stock: parseInt(producto.stock, 10)
+    stock: parseInt(producto.stock, 10),
+    imagenUrl: producto.imagenUrl && producto.imagenUrl.trim() !== '' ? producto.imagenUrl.trim() : null
   };
 
     try {
@@ -151,6 +153,30 @@ export function CrearProducto() {
                   <small className="char-count">
                     {producto.descripcion.length}/500 caracteres
                   </small>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="imagenUrl">
+                  Ruta de la imagen (opcional)
+                </label>
+                <input
+                  type="text"
+                  id="imagenUrl"
+                  name="imagenUrl"
+                  value={producto.imagenUrl}
+                  onChange={handleChange}
+                  disabled={loading}
+                  placeholder="Ej: /img/producto1.svg o /static/img/producto1.svg"
+                />
+                <small className="help-text">Coloca la ruta relativa a la carpeta de imágenes (por ejemplo <code>/img/archivo.svg</code>).</small>
+                {producto.imagenUrl && (
+                  <div style={{ marginTop: '8px' }}>
+                    <strong>Vista previa:</strong>
+                    <div style={{ marginTop: '6px' }}>
+                      <img src={producto.imagenUrl} alt="preview" style={{ maxWidth: '160px', maxHeight: '120px', objectFit: 'cover', borderRadius: '6px' }} />
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="form-row">
