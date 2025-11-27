@@ -97,6 +97,9 @@ Ejecutar los tests unitarios:
 ./mvnw test
 ```
 
+Ejecutar los test de FrontEnd react:
+npm run test
+
 ## Estructura del Proyecto
 
 ### Backend
