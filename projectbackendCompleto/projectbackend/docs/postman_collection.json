@@ -1,0 +1,27 @@
+{
+  "info": {
+    "name": "Projectbackend - Colección básica",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Register User",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"nombre\":\"Juan\",\"email\":\"juan@mail.com\",\"contrasena\":\"123456\",\"rol\":\"CLIENTE\"}"
+        },
+        "url": { "raw": "http://localhost:8080/api/auth/register", "protocol": "http", "host": ["localhost"], "port": "8080", "path": ["api","auth","register"] }
+      }
+    },
+    {
+      "name": "List Products",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "http://localhost:8080/api/productos", "protocol": "http", "host": ["localhost"], "port": "8080", "path": ["api","productos"] }
+      }
+    }
+  ]
+}
